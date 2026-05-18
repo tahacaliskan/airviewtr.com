@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirViewTR - Premium Drone Prodüksiyon & Görüntüleme</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { 
+            primary: '#2563eb', 
+            'primary-dark': '#1d4ed8', 
+            background: '#fafafa', 
+            surface: '#ffffff' 
+          },
+          fontFamily: { 
+            sans: ['Inter', 'sans-serif'], 
+            heading: ['Plus Jakarta Sans', 'sans-serif'] 
+          },
+          animation: {
+            'blob': 'blob 7s infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 2s infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'bg-pan': 'bg-pan 8s linear infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-15px)' },
+            },
+            'bg-pan': {
+              '0%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+              '100%': { backgroundPosition: '0% 50%' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+    
+    body { font-family: 'Inter', sans-serif; overflow-x: hidden; background-color: #fafafa; color: #1f2937; }
+    
+    /* Reveal Animations */
+    .reveal { opacity: 0; transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    .reveal:not(.from-left):not(.from-right):not(.zoom-in):not(.blur-in) { transform: translateY(60px); }
+    .reveal.from-left { transform: translateX(-60px); }
+    .reveal.from-right { transform: translateX(60px); }
+    .reveal.zoom-in { transform: scale(0.9) translateY(40px); }
+    .reveal.blur-in { transform: translateY(40px); filter: blur(15px); }
+    .reveal.active { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+    .reveal-delay-6 { transition-delay: 0.6s; }
+
+    /* Page Views */
+    .view { display: none; opacity: 0; transition: opacity 0.4s ease-in-out; }
+    .view.active { display: block; opacity: 1; }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    /* Navbar Transitions */
+    .nav-scrolled { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding-top: 1rem; padding-bottom: 1rem; }
+    .nav-transparent { background: transparent; padding-top: 1.5rem; padding-bottom: 1.5rem; }
+
+    /* Clip Path */
+    .clip-bottom { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - 4vw)); }
+    .clip-top { clip-path: polygon(0 4vw, 100% 0, 100% 100%, 0 100%); }
+    
+    .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
+  </style>
+</head>
+<body class="antialiased selection:bg-primary selection:text-white pt-20 lg:pt-0">
+
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 nav-transparent bg-white/95 lg:bg-transparent border-b border-gray-100 lg:border-transparent">
+    <div class="container mx-auto px-6 md:px-12 flex items-center justify-between">
+      <a href="#/home" class="flex items-center gap-3 group py-2 lg:py-0">
+        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-heading font-extrabold text-xl transition-transform group-hover:scale-105 shadow-md shadow-primary/30">A</div>
+        <span class="font-heading font-extrabold text-2xl tracking-tighter text-gray-900">AirView<span class="text-primary">TR</span></span>
+      </a>
+      
+      <div class="hidden lg:flex items-center gap-8">
+        <a href="#/home" class="text-sm font-medium hover:text-primary transition-colors text-gray-700 relative group">
+          Ana Sayfa <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#/hizmetlerimiz" class="text-sm font-medium hover:text-primary transition-colors text-gray-700 relative group">
+          Hizmetlerimiz <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#/portfolyo" class="text-sm font-medium hover:text-primary transition-colors text-gray-700 relative group">
+          Portfolyo <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#/galeri" class="text-sm font-medium hover:text-primary transition-colors text-gray-700 relative group">
+          Galeri <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#/kadromuz" class="text-sm font-medium hover:text-primary transition-colors text-gray-700 relative group">
+          Kadromuz <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#/hakkimizda" class="text-sm font-medium hover:text-primary transition-colors text-gray-700 relative group">
+          Hakkımızda <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#/iletisim" class="ml-2 px-6 py-2.5 bg-gray-900 text-white font-semibold text-sm rounded-full hover:bg-primary shadow-lg shadow-gray-900/20 hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
+          İletişim & Teklif
+        </a>
+      </div>
+      
+      <button id="mobile-menu-btn" class="lg:hidden text-gray-900 p-2 focus:outline-none bg-gray-100 rounded-lg">
+        <i data-lucide="menu" id="menu-icon"></i>
+        <i data-lucide="x" id="close-icon" class="hidden"></i>
+      </button>
+    </div>
+    
+    <div id="mobile-menu" class="hidden lg:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-2xl absolute top-full left-0 w-full z-40 transition-all origin-top">
+      <div class="flex flex-col py-6 px-8 gap-5">
+        <a href="#/home" class="mobile-link text-lg font-semibold text-gray-800 hover:text-primary transition-colors">Ana Sayfa</a>
+        <a href="#/hizmetlerimiz" class="mobile-link text-lg font-semibold text-gray-800 hover:text-primary transition-colors">Hizmetlerimiz</a>
+        <a href="#/portfolyo" class="mobile-link text-lg font-semibold text-gray-800 hover:text-primary transition-colors">Portfolyo</a>
+        <a href="#/galeri" class="mobile-link text-lg font-semibold text-gray-800 hover:text-primary transition-colors">Galeri</a>
+        <a href="#/kadromuz" class="mobile-link text-lg font-semibold text-gray-800 hover:text-primary transition-colors">Kadromuz</a>
+        <a href="#/hakkimizda" class="mobile-link text-lg font-semibold text-gray-800 hover:text-primary transition-colors">Hakkımızda</a>
+        <a href="#/iletisim" class="mobile-link mt-2 text-center px-6 py-3.5 bg-primary text-white font-bold rounded-full shadow-lg shadow-primary/30">İletişim & Teklif</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="view-home" class="view active">
+    
+    <section class="relative min-h-screen overflow-hidden pb-24 bg-white clip-bottom -mt-20 pt-36 lg:pt-48">
+      <div class="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob z-0"></div>
+      <div class="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000 z-0"></div>
+      <div class="absolute -bottom-8 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000 z-0"></div>
+
+      <div class="absolute inset-0 z-0 content-end">
+        <div class="absolute inset-x-0 bottom-0 top-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
+        <img src="https://images.unsplash.com/photo-1473968512647-3e447244af8f?q=80&w=2500&auto=format&fit=crop" class="w-full h-full object-cover opacity-15" alt="Drone Background" />
+      </div>
+
+      <div class="relative z-[60] container mx-auto px-6 text-center max-w-[1173px] w-full mt-4 md:mt-8 lg:mt-12">
+        <div class="reveal">
+          <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-primary/10 border border-primary/20 text-primary-dark text-sm font-bold tracking-widest uppercase mb-8 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            Türkiye'nin Lider Drone Ajansı
+          </span>
+        </div>
+        
+        <h1 class="reveal blur-in reveal-delay-1 text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-heading font-extrabold tracking-tight text-gray-900 mb-8 leading-normal sm:leading-relaxed">
+          Markanı Gökyüzünden <br class="hidden md:block"/>
+          <span class="inline-block text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-primary bg-[length:200%_auto] animate-bg-pan">Yükselt</span>
+        </h1>
+        
+        <p class="reveal blur-in reveal-delay-2 mx-auto text-base sm:text-lg md:text-xl text-gray-600 mb-12 leading-loose font-medium max-w-3xl">
+          Premium havadan görüntüleme, dinamik FPV uçuşları ve baştan sona sinematik prodüksiyon ile hikayenizi en etkileyici açıdan anlatın.
+        </p>
+        
+        <div class="reveal blur-in reveal-delay-3 flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <a href="https://wa.me/905013466560?text=Merhaba, projelerim için teklif almak istiyorum." target="_blank" class="group flex items-center justify-center gap-2 px-8 py-4 bg-[#25D366] text-white font-bold rounded-full hover:bg-[#128C7E] transition-all hover:-translate-y-1 shadow-xl shadow-[#25D366]/30 w-full sm:w-auto">
+            <i data-lucide="bot" class="w-5 h-5 animate-pulse"></i>
+            Yapay Zeka ile Hızlı Teklif Al
+          </a>
+          <a href="#/iletisim" class="group flex items-center justify-center gap-3 px-8 py-4 bg-white border border-gray-200 text-gray-900 font-bold rounded-full hover:bg-gray-50 transition-all hover:-translate-y-1 shadow-lg shadow-gray-200/50 w-full sm:w-auto">
+             Bize Ulaşın
+          </a>
+        </div>
+
+        <div class="reveal zoom-in reveal-delay-3 animate-float w-full aspect-video rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(37,99,235,0.25)] ring-1 ring-gray-900/5 hover:animate-none transition-all duration-700 hover:shadow-[0_30px_70px_rgba(37,99,235,0.4)] hover:scale-[1.01]">
+          <iframe class="w-full h-full" src="https://www.youtube.com/embed/YE7VzlLtp-4?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-10 pb-20 bg-white relative z-10">
+      <div class="container mx-auto px-6">
+        <p class="text-center text-sm font-semibold text-gray-400 uppercase tracking-widest mb-6 reveal">Referanslarımız & Güvenen Markalar</p>
+        <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 reveal reveal-delay-1">
+          <div class="flex items-center gap-2"><i data-lucide="building" class="w-6 h-6"></i><span class="font-heading font-bold text-xl">Lumina</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="hotel" class="w-6 h-6"></i><span class="font-heading font-bold text-xl">GrandEstate</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="compass" class="w-6 h-6"></i><span class="font-heading font-bold text-xl">VentureCorp</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="anchor" class="w-6 h-6"></i><span class="font-heading font-bold text-xl">MarineLife</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hizmetlerimiz -->
+    <section id="hizmetlerimiz" class="py-24 bg-gray-50 border-t border-gray-100 relative z-20">
+      <div class="container mx-auto px-6">
+        <div class="mb-16 text-center max-w-3xl mx-auto reveal">
+          <h2 class="text-primary text-sm font-bold tracking-widest uppercase mb-3">Hizmetlerimiz</h2>
+          <h3 class="text-3xl md:text-5xl font-heading font-extrabold mb-6 text-gray-900 tracking-tight leading-tight">Gökten ve Yerden <span class="text-gray-400 font-light">Kusursuz Görüntüler</span></h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="services-grid">
+        </div>
+      </div>
+    </section>
+
+    <!-- Sektörler -->
+    <section class="py-24 bg-white border-t border-gray-100">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-16 reveal">
+           <h2 class="text-primary text-sm font-bold tracking-widest uppercase mb-3">Çözüm Ortaklıklarımız</h2>
+           <h3 class="text-3xl md:text-5xl font-heading font-extrabold text-gray-900 tracking-tight leading-tight">Hizmet Verdiğimiz <span class="text-gray-400 font-light">Sektörler</span></h3>
+           <p class="text-gray-600 mt-4 font-medium max-w-2xl mx-auto">Her sektörün dinamiği farklıdır. Projenize özel bakış açıları geliştiriyoruz.</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" id="sectors-grid">
+        </div>
+      </div>
+    </section>
+
+    <!-- Surec -->
+    <section id="surec" class="py-24 relative overflow-hidden bg-white">
+      <div class="container mx-auto px-6 relative z-10">
+        <div class="text-center mb-20 reveal">
+          <h2 class="text-primary text-sm font-bold tracking-widest uppercase mb-3">Çalışma Şeklimiz</h2>
+          <h3 class="text-3xl md:text-5xl font-heading font-extrabold text-gray-900 tracking-tight leading-tight">Fikirden <span class="text-gray-400 font-light">Gerçeğe</span></h3>
+        </div>
+        
+        <div class="relative max-w-5xl mx-auto">
+          <div class="hidden md:block absolute top-[44px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-gray-100 via-primary/30 to-gray-100 z-0"></div>
+          <div class="flex flex-col md:flex-row items-stretch justify-between gap-8 relative z-10" id="process-grid">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Portfolyo -->
+    <section id="portfolyo" class="py-24 bg-gray-900 text-white clip-top clip-bottom relative">
+      <div class="absolute inset-0 z-0 opacity-10">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full mix-blend-overlay filter blur-[100px]"></div>
+      </div>
+      <div class="container mx-auto px-6 relative z-10 py-10">
+        <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-16 reveal">
+          <div>
+            <h2 class="text-blue-400 text-sm font-bold tracking-widest uppercase mb-3">Portfolyo</h2>
+            <h3 class="text-3xl md:text-5xl font-heading font-extrabold tracking-tight leading-tight">Öne Çıkan <span class="italic text-gray-400 font-light">Projelerimiz</span></h3>
+          </div>
+          <a href="#/portfolyo-detay" class="inline-flex items-center gap-2 pb-1 border-b-2 border-primary text-gray-300 font-medium hover:text-white transition-colors group">
+            Tümünü Gör <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="portfolio-grid">
+        </div>
+      </div>
+    </section>
+
+    <!-- Hakkımızda -->
+    <section id="hakkimizda" class="py-24 bg-white pt-32 -mt-10">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div class="reveal from-left relative rounded-3xl overflow-hidden aspect-[4/5] shadow-2xl group">
+            <img src="https://images.unsplash.com/photo-1541888086438-23214b2d5edb?w=800" class="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" alt="Ekip Fotoğrafı" />
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"></div>
+            <div class="absolute bottom-8 left-8 right-8 glass-card p-6 rounded-2xl border border-white/20 shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
+              <p class="text-gray-900 font-medium text-sm md:text-base italic mb-3">"Her çekimde yeni bir perspektif, her karede farklı bir hikaye arıyoruz."</p>
+              <p class="text-gray-900 font-bold">— AirViewTR Yönetimi</p>
+            </div>
+          </div>
+          <div class="reveal from-right reveal-delay-1">
+            <h2 class="text-primary text-sm font-bold tracking-widest uppercase mb-3">Hakkımızda</h2>
+            <h3 class="text-3xl md:text-5xl font-heading font-extrabold text-gray-900 mb-6 tracking-tight leading-tight">Mükemmelliği Hem Göklerde Hem Yerde Arıyoruz.</h3>
+            <p class="text-gray-600 text-lg mb-8 leading-relaxed">
+              Yılların getirdiği tecrübe ile havada premium drone sistemlerimizle harikalar yaratırken, <strong>yerden de sinema standartlarında ekipmanlarımızla (Sony FX serisi kameralar, RED, profesyonel gimbal ve yaka/boom ses sistemleri)</strong> eksiksiz bir bütünlük sağlıyoruz. Sadece uçmuyoruz, hikayenizi en estetik, en profesyonel ekipmanlarla 360 derece dokuyoruz.
+            </p>
+            <ul class="space-y-4 mb-10">
+              <li class="flex items-center gap-4 text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm transition-all hover:bg-white hover:shadow-md">
+                <div class="bg-primary/10 w-12 h-12 flex items-center justify-center rounded-lg text-primary"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
+                <span class="font-bold text-lg">SHGM / FAA Onaylı Lisanslı Pilotlar</span>
+              </li>
+              <li class="flex items-center gap-4 text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm transition-all hover:bg-white hover:shadow-md">
+                <div class="bg-primary/10 w-12 h-12 flex items-center justify-center rounded-lg text-primary"><i data-lucide="video" class="w-6 h-6"></i></div>
+                <span class="font-bold text-lg">Havada ve Yerde 4K Sinematik Görüntü</span>
+              </li>
+            </ul>
+            
+            <div id="stats-container" class="grid grid-cols-2 lg:grid-cols-3 gap-6 pt-8 border-t border-gray-100 reveal">
+              <div class="bg-gray-50 rounded-2xl p-6 text-center border border-gray-100">
+                <div class="text-4xl font-heading font-extrabold text-primary mb-1 flex justify-center items-center"><span class="counter" data-target="50" data-prefix="" data-suffix="+">0</span></div>
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Marka İşbirliği</div>
+              </div>
+              <div class="bg-gray-50 rounded-2xl p-6 text-center border border-gray-100">
+                <div class="text-4xl font-heading font-extrabold text-primary mb-1 flex justify-center items-center"><span class="counter" data-target="5000" data-prefix="" data-suffix="+">0</span></div>
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Uçuş Saati</div>
+              </div>
+              <div class="bg-gray-50 rounded-2xl p-6 text-center border border-gray-100 hidden lg:block">
+                <div class="text-4xl font-heading font-extrabold text-primary mb-1 flex justify-center items-center"><span class="counter" data-target="70" data-prefix="%" data-suffix="">0</span></div>
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Müşteri Memnuniyeti</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-24 bg-gray-50 pb-32">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-16 reveal">
+          <h2 class="text-primary text-sm font-bold tracking-widest uppercase mb-3">Referanslar</h2>
+          <h3 class="text-3xl md:text-5xl font-heading font-extrabold text-gray-900 tracking-tight leading-tight">Sözü <span class="text-gray-400 font-light">Müşterilerimize</span> Bırakalım</h3>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8" id="testimonials-grid">
+        </div>
+      </div>
+    </section>
+    
+    <!-- CTA -->
+    <section class="py-24 relative overflow-hidden">
+      <div class="absolute inset-0">
+        <img src="https://images.unsplash.com/photo-1506422749896-ac1533ebc165?w=1600&auto=format" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-primary/95 mix-blend-multiply"></div>
+      </div>
+      <div class="container mx-auto px-6 relative z-10 text-center reveal">
+        <h2 class="text-3xl md:text-5xl font-heading font-extrabold text-white mb-6 leading-tight">Projeniz İçin Havalanmaya Hazırız.</h2>
+        <p class="text-blue-100 text-lg md:text-xl font-medium max-w-2xl mx-auto mb-10">Fikirlerinizi dinlemek ve onları gökyüzünden en iyi açıyla yakalamak için sabırsızlanıyoruz.</p>
+        <a href="#/iletisim" class="inline-flex items-center justify-center gap-2 px-10 py-5 bg-white text-primary font-bold text-lg rounded-full hover:bg-gray-100 hover:scale-105 transition-all shadow-2xl">
+          Bize Ulaşın
+          <i data-lucide="arrow-right" class="w-5 h-5 ml-1"></i>
+        </a>
+        <br/><br/>
+        <a href="https://wa.me/905013466560?text=Merhaba, projelerim için teklif almak istiyorum." target="_blank" class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white/10 text-white font-medium border border-white/20 rounded-full hover:bg-white/20 hover:scale-105 transition-all">
+          <i data-lucide="bot" class="w-4 h-4"></i> WhatsApp Yapay Zeka Asistanı ile Görüş
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <main id="view-galeri" class="view pt-32 pb-24 min-h-screen bg-gray-50">
+    <div class="container mx-auto px-6 text-center mb-16 reveal">
+      <h2 class="text-primary text-sm font-bold tracking-widest uppercase mb-3">Galeri</h2>
+      <h1 class="text-4xl md:text-6xl font-heading font-extrabold text-gray-900 mb-6 tracking-tight leading-tight">Karelere Sığan <span class="text-gray-400 font-light">Mükemmellik</span></h1>
+      <p class="max-w-2xl mx-auto text-gray-600 text-lg">Gerçekleştirdiğimiz sayısız projeden en çarpıcı hava fotoğrafçılığı örnekleri.</p>
+    </div>
+    
+    <div class="container mx-auto px-6 pb-20">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8" id="gallery-container">
+      </div>
+    </div>
+  </main>
+
+  <main id="view-kadromuz" class="view pt-32 pb-24 min-h-screen bg-white">
+    <div class="container mx-auto px-6 text-center mb-16 reveal">
+      <h2 class="text-primary text-sm font-bold tracking-widest uppercase mb-3">Ekibimiz</h2>
+      <h1 class="text-4xl md:text-6xl font-heading font-extrabold text-gray-900 mb-6 tracking-tight leading-tight">Vizyonu Gerçeğe Dönüştüren <span class="text-gray-400 font-light">Uzmanlar</span></h1>
+    </div>
+    <div class="container mx-auto px-6 pb-20">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="team-container">
+      </div>
+    </div>
+  </main>
+
+  <main id="view-iletisim" class="view pt-32 pb-24 min-h-screen bg-gray-50">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+        <div class="reveal from-left">
+          <h2 class="text-primary text-sm font-bold tracking-widest uppercase mb-3">İletişim</h2>
+          <h3 class="text-4xl md:text-5xl font-heading font-extrabold text-gray-900 mb-6 leading-tight">Bize Ulaşın</h3>
+          <p class="text-gray-600 text-lg mb-10 leading-relaxed font-medium">Projeleriniz için detaylı bilgi ve fiyat teklifi almak istiyorsanız, formu doldurun veya doğrudan bizimle iletişime geçin.</p>
+          <div class="space-y-6">
+            <a href="mailto:info@airviewtr.com" class="group flex items-center gap-6 p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                <i data-lucide="mail"></i>
+              </div>
+              <div>
+                <h5 class="text-gray-900 font-bold text-lg">E-Posta</h5>
+                <p class="text-gray-500 font-medium">airviewtr.media@gmail.com</p>
+              </div>
+            </a>
+            <a href="tel:+905555555555" class="group flex items-center gap-6 p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                <i data-lucide="phone"></i>
+              </div>
+              <div>
+                <h5 class="text-gray-900 font-bold text-lg">Telefon / WhatsApp</h5>
+                <p class="text-gray-500 font-medium">+90 (501) 346 65 60</p>
+              </div>
+            </a>
+            <div class="flex items-center gap-6 p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+              <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                <i data-lucide="map-pin"></i>
+              </div>
+              <div>
+                <h5 class="text-gray-900 font-bold text-lg">Neredeyiz?</h5>
+                <p class="text-gray-500 font-medium">Şehitkamil / Gaziantep</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal from-right reveal-delay-1">
+          <div class="bg-white border border-gray-100 shadow-xl p-8 md:p-10 rounded-3xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px]"></div>
+            <h4 class="text-2xl font-bold font-heading text-gray-900 mb-8 relative z-10">Teklif İste Formu</h4>
+            <!-- Formspree veya Web3Forms Entegrasyonu -->
+            <form id="contact-form" class="space-y-6 relative z-10">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Adınız Soyadınız</label>
+                <input type="text" name="name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium" />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">E-Posta Adresiniz</label>
+                <input type="email" name="email" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium" />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Hizmet Türü</label>
+                <select name="service_type" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium appearance-none">
+                  <option value="">Seçiniz...</option>
+                  <option value="commercial">Reklam / Tanıtım</option>
+                  <option value="real_estate">Gayrimenkul Çekimi</option>
+                  <option value="event">Etkinlik / Organizasyon</option>
+                  <option value="fpv">FPV Aksiyon</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Mesajınız & Proje Detayları</label>
+                <textarea name="message" rows="4" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium resize-none"></textarea>
+              </div>
+              
+              <div id="form-status" class="hidden rounded-xl p-4 text-sm font-bold text-center"></div>
+
+              <button type="submit" id="submit-btn" class="w-full bg-primary text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-primary-dark transition-all hover:shadow-lg hover:shadow-primary/30">
+                <span>Gönder ve Teklif Al</span>
+                <i data-lucide="send" class="w-5 h-5 ml-1"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-gray-900 border-t border-gray-800 pt-20 pb-10">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div class="lg:col-span-2">
+          <a href="#/home" class="flex items-center gap-3 mb-6 group inline-flex">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-heading font-extrabold text-xl shadow-lg shadow-primary/20">A</div>
+            <span class="font-heading font-extrabold text-2xl tracking-tighter text-white">AirView<span class="text-primary">TR</span></span>
+          </a>
+          <p class="text-gray-400 text-sm mb-6 max-w-sm leading-relaxed font-medium">
+            Türkiye'nin lider premium drone videografi ajansı. Modern teknoloji ile sinematik hikayeler anlatıyoruz.
+          </p>
+          <div class="flex gap-4">
+            <a href="#" class="w-10 h-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary hover:border-primary transition-all"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+            <a href="#" class="w-10 h-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+            <a href="#" class="w-10 h-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+          </div>
+        </div>
+        <div>
+           <h4 class="text-white font-bold mb-6 font-heading text-lg">Hızlı Bağlantılar</h4>
+           <ul class="space-y-4">
+             <li><a href="#/home" class="text-gray-400 hover:text-primary transition-colors text-sm font-semibold">Ana Sayfa</a></li>
+             <li><a href="#/hizmetlerimiz" class="text-gray-400 hover:text-primary transition-colors text-sm font-semibold">Hizmetlerimiz</a></li>
+             <li><a href="#/portfolyo" class="text-gray-400 hover:text-primary transition-colors text-sm font-semibold">Portfolyo</a></li>
+             <li><a href="#/galeri" class="text-gray-400 hover:text-primary transition-colors text-sm font-semibold">Galeri</a></li>
+           </ul>
+        </div>
+        <div>
+           <h4 class="text-white font-bold mb-6 font-heading text-lg">İletişim</h4>
+           <ul class="space-y-4">
+             <li class="flex items-center gap-3 text-gray-400 text-sm">
+               <i data-lucide="map-pin" class="w-5 h-5 text-primary"></i> <span class="font-medium">Şehitkamil / Gaziantep</span>
+             </li>
+             <li class="flex items-center gap-3 text-gray-400 text-sm">
+               <i data-lucide="phone" class="w-5 h-5 text-primary"></i> <span class="font-medium">+90 (501) 346 65 60</span>
+             </li>
+             <li class="flex items-center gap-3 text-gray-400 text-sm">
+               <i data-lucide="mail" class="w-5 h-5 text-primary"></i> <span class="font-medium">airviewtr.media@gmail.com</span>
+             </li>
+           </ul>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-gray-500 text-sm font-medium">&copy; 2026 AirViewTR. Tüm hakları saklıdır.</p>
+        <div class="flex gap-4">
+          <a href="#" class="text-gray-500 hover:text-white text-sm transition-colors font-medium">Gizlilik Politikası</a>
+          <a href="#" class="text-gray-500 hover:text-white text-sm transition-colors font-medium">Şartlar</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/905013466560?text=Merhaba, fiyat almak istiyorum." target="_blank" class="fixed bottom-6 right-6 z-50 flex items-center justify-center h-16 bg-[#25D366] text-white rounded-full shadow-[0_0_20px_rgba(37,211,102,0.4)] hover:bg-[#128C7E] transition-all hover:-translate-y-1 group px-5 lg:px-6 gap-3 pr-6 lg:pr-8">
+    <span class="absolute inset-0 bg-[#25D366] rounded-full animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] opacity-40 group-hover:animate-none"></span>
+    <i data-lucide="bot" class="w-7 h-7 relative z-10 animate-[bounce_2s_infinite]"></i>
+    <div class="relative z-10 flex flex-col items-start leading-tight">
+       <span class="text-[10px] sm:text-xs font-bold opacity-90 uppercase tracking-widest">Yapay Zeka Asistanı</span>
+       <span class="font-extrabold text-sm whitespace-nowrap">Hızlı Teklif & Bilgi Alın</span>
+    </div>
+  </a>
+
+  <!-- Modals -->
+  <div id="video-modal" class="hidden fixed inset-0 z-[100] bg-black/95 items-center justify-center p-4 backdrop-blur-sm" onclick="closeVideo()">
+    <button onclick="closeVideo()" class="absolute top-6 right-6 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all z-[110]">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+    <div class="w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden relative shadow-2xl ring-1 ring-white/10 mb-10 reveal" onclick="event.stopPropagation()">
+      <iframe id="yt-iframe" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+  
+  <div id="image-modal" class="hidden fixed inset-0 z-[100] bg-black/95 items-center justify-center p-4 backdrop-blur-sm" onclick="closeImage()">
+    <button onclick="closeImage()" class="absolute top-6 right-6 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all z-[110]">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+    <img id="lightbox-img" src="" class="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl reveal mb-10" onclick="event.stopPropagation()" />
+  </div>
+
+  <script>
+    const DATA = {
+      sectors: [
+        { icon: 'home', title: 'Gayrimenkul ve Emlak' },
+        { icon: 'hotel', title: 'Oteller ve Turizm' },
+        { icon: 'building-2', title: 'Kurumsal İşletmeler' },
+        { icon: 'factory', title: 'Fabrikalar ve Sanayi' },
+        { icon: 'party-popper', title: 'Etkinlik ve Organizasyon' },
+        { icon: 'hard-hat', title: 'İnşaat ve Mimari' }
+      ],
+      services: [
+        { icon: 'camera', title: 'Profesyonel Çekim', desc: 'DJI Inspire ve Mavic sistemlerinin yanı sıra Sony FX ve RED kameralarımızla hem havada hem yerde 4K/5K sinematik kalitede görüntüler yaratıyoruz.' },
+        { icon: 'film', title: 'Tanıtım Filmleri', desc: 'Şirketiniz veya projeniz için uçtan uca prodüksiyon, kurgu ve ses tasarımı hizmeti.' },
+        { icon: 'rocket', title: 'FPV Çekimler', desc: 'Tamamen manuel uçuşlarla dar binalar ve hızlı takip sahneleri için ekstrem çözümler.' },
+        { icon: 'instagram', title: 'Sosyal Medya', desc: 'TikTok, Reels ve Shorts için dikey formatta dikkat çekici içerik üretimi yönetimi.' }
+      ],
+      process: [
+        { icon: 'coffee', title: 'Keşif Toplantısı', desc: 'Vizyonunuzu, hedeflerinizi ve mekan detaylarını profesyonel ekibimizle analiz ediyoruz.' },
+        { icon: 'map', title: 'Uçuş Planı', desc: 'Gerekli yasal izinler, güvenli rotalar ve doğru çekim açıları için teknik planlama yapıyoruz.' },
+        { icon: 'video', title: 'Prodüksiyon', desc: 'Tam donanımlı set ve profesyonel ekibimizle en kaliteli 4K ham görüntüleri sahada elde ediyoruz.' },
+        { icon: 'scissors', title: 'Aşamasında Kurgu', desc: 'Renk düzenlemesi (Color Grading) ve özel ses efektleriyle sinematik filminizi hazırlıyoruz.' }
+      ],
+      portfolio: [
+        { title: 'Bosphorus Yalı Rotası', cat: 'Emlak & Lüks', img: 'https://images.unsplash.com/photo-1541888086438-23214b2d5edb?w=800', video: 'https://www.youtube.com/embed/YE7VzlLtp-4?autoplay=1' },
+        { title: 'Kanyon AVM Etkinlik', cat: 'Event & Organizasyon', img: 'https://images.unsplash.com/photo-1506422749896-ac1533ebc165?w=800', video: 'https://www.youtube.com/embed/YE7VzlLtp-4?autoplay=1' },
+        { title: 'Otomobil Lansmanı', cat: 'Reklam / FPV', img: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=800', video: 'https://www.youtube.com/embed/YE7VzlLtp-4?autoplay=1' },
+        { title: 'Mega Fabrika Gezisi', cat: 'Endüstriyel', img: 'https://images.unsplash.com/photo-1504958048259-22a33cb86eb7?w=800', video: 'https://www.youtube.com/embed/YE7VzlLtp-4?autoplay=1' }
+      ],
+      gallery: [
+        'https://images.unsplash.com/photo-1508614589041-895b88991e3e?q=80&w=800', 
+        'https://images.unsplash.com/photo-1473968512647-3e447244af8f?q=80&w=800',
+        'https://images.unsplash.com/photo-1506422749896-ac1533ebc165?q=80&w=800', 
+        'https://images.unsplash.com/photo-1541888086438-23214b2d5edb?q=80&w=800',
+        'https://images.unsplash.com/photo-1504958048259-22a33cb86eb7?q=80&w=800', 
+        'https://images.unsplash.com/photo-1464692805481-9b168db7eece?q=80&w=800'
+      ],
+      team: [
+        { name: 'Kaan Demir', role: 'Kurucu / Baş Pilot', desc: '12 yıllık havacılık ve 5000+ uçuş saati tecrübesiyle gökyüzünün hakimi.', img: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400' },
+        { name: 'Zeynep Alkan', role: 'Kurgu & Renk Yönt.', desc: 'DaVinci Resolve uzmanı. Hikayeleri renk paletleriyle baştan yazar.', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400' },
+        { name: 'Canberk Yücel', role: 'FPV Operatörü', desc: 'Özel yapım drone\'lar ile ekstrem sporların ve dar alanların korkusuz pilotu.', img: 'https://images.unsplash.com/photo-1548142813-c348350df52b?w=400' },
+        { name: 'Elif Şahin', role: 'Prodüksiyon Amiri', desc: 'Tüm lojistik, müşteri ilişkileri ve lokasyon izinlerinin maestrosu.', img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400' }
+      ],
+      reviews: [
+        { text: "AirViewTR ile çalışmak vizyonumuzu bambaşka bir seviyeye taşıdı. Kurgu hızları ve ekipmanın kalitesi muazzam.", author: "Ahmet D. / Gayrimenkul Geliştirici" },
+        { text: "Festivallerimizde hep onları tercih ediyoruz. Gündüzden geceye mükemmel renk kalitesi sunuyorlar.", author: "Ceren Y. / Etkinlik Direktörü" },
+        { text: "Özellikle FPV çekimlerinde Türkiye'deki en iyi ekiplerden biri. Videomuz viral oldu!", author: "Sarp K. / Marka Yöneticisi" }
+      ]
+    };
+
+    const renderServices = () => {
+      document.getElementById('services-grid').innerHTML = DATA.services.map((s, i) => `
+        <div class="reveal zoom-in reveal-delay-${(i%4)+1} group p-8 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+          <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-8 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+            <i data-lucide="${s.icon}" class="w-8 h-8"></i>
+          </div>
+          <h4 class="text-xl font-bold font-heading text-gray-900 mb-4">${s.title}</h4>
+          <p class="text-gray-600 font-medium leading-relaxed">${s.desc}</p>
+        </div>
+      `).join('');
+    };
+
+    const renderProcess = () => {
+      document.getElementById('process-grid').innerHTML = DATA.process.map((p, i) => `
+        <div class="reveal from-bottom blur-in reveal-delay-${i+1} flex flex-col items-center flex-1 w-full text-center relative z-10 group mt-8 md:mt-0">
+          <div class="w-24 h-24 rounded-full bg-white border-4 border-gray-100 flex items-center justify-center shadow-lg mb-6 text-gray-500 group-hover:border-primary group-hover:text-primary group-hover:scale-110 transition-all duration-300 relative">
+            <span class="absolute -top-3 -right-3 w-8 h-8 bg-gray-900 text-white flex items-center justify-center rounded-full text-sm font-bold shadow-md ring-4 ring-white">0${i+1}</span>
+            <i data-lucide="${p.icon}" class="w-10 h-10"></i>
+          </div>
+          <h4 class="text-xl font-bold font-heading text-gray-900 mb-3">${p.title}</h4>
+          <p class="text-gray-500 font-medium text-sm max-w-[200px] leading-relaxed mx-auto">${p.desc}</p>
+        </div>
+      `).join('');
+    };
+
+    const renderPortfolio = () => {
+      document.getElementById('portfolio-grid').innerHTML = DATA.portfolio.map((p, i) => `
+        <div class="reveal zoom-in reveal-delay-${(i%2)+1} group relative overflow-hidden rounded-3xl aspect-video bg-gray-800 cursor-pointer shadow-xl ring-1 ring-white/10 hover:shadow-[0_40px_80px_rgba(37,99,235,0.3)] transition-all duration-700 hover:scale-[1.02]" onclick="openVideo('${p.video}')">
+          <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 group-hover:opacity-60 transition duration-700 opacity-80" loading="lazy" />
+          <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
+          
+          <div class="absolute bottom-0 left-0 w-full p-8 transition-transform group-hover:-translate-y-2">
+            <span class="inline-block text-primary-dark font-bold font-heading uppercase tracking-wider bg-white/95 backdrop-blur-md px-4 py-1.5 rounded-full text-xs mb-3 shadow-md">${p.cat}</span>
+            <h4 class="text-2xl md:text-3xl font-heading font-extrabold text-white leading-tight">${p.title}</h4>
+          </div>
+          
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-50 group-hover:scale-100">
+            <div class="w-20 h-20 rounded-full bg-primary/95 flex items-center justify-center text-white shadow-xl shadow-primary/40 backdrop-blur-sm relative">
+               <span class="absolute inset-0 bg-primary rounded-full animate-ping opacity-40"></span>
+               <i data-lucide="play" class="w-8 h-8 ml-1"></i>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    const renderGallery = () => {
+      document.getElementById('gallery-container').innerHTML = DATA.gallery.map((img, i) => `
+        <div class="reveal zoom-in reveal-delay-${(i%3)+1} group relative aspect-[4/3] overflow-hidden rounded-2xl cursor-pointer shadow-md hover:shadow-xl transition-all hover:scale-[1.02] duration-500 hover:-translate-y-2" onclick="openImage('${img}')">
+          <img src="${img}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+          <div class="absolute inset-0 bg-primary/20 mix-blend-multiply opacity-0 group-hover:opacity-100 transition duration-500"></div>
+          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+            <div class="bg-white/20 p-4 rounded-full text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+               <i data-lucide="zoom-in" class="w-8 h-8"></i>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    const renderTeam = () => {
+      document.getElementById('team-container').innerHTML = DATA.team.map((t, i) => `
+        <div class="reveal from-bottom reveal-delay-${(i%4)+1} bg-gray-50 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 group transition-all duration-500 hover:-translate-y-2">
+          <div class="relative aspect-[4/5] overflow-hidden bg-gray-200">
+            <img src="${t.img}" class="w-full h-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" />
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+          <div class="p-8 text-center bg-white relative -mt-6 mx-4 rounded-2xl shadow-lg group-hover:-translate-y-4 transition-transform duration-500 border border-gray-100">
+            <h3 class="text-xl font-heading font-extrabold text-gray-900 mb-1">${t.name}</h3>
+            <p class="text-primary font-bold text-sm mb-4 uppercase tracking-wider">${t.role}</p>
+            <p class="text-gray-500 font-medium text-sm leading-relaxed">${t.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    const renderTestimonials = () => {
+      document.getElementById('testimonials-grid').innerHTML = DATA.reviews.map((r, i) => `
+        <div class="reveal blur-in reveal-delay-${(i%3)+1} bg-white border border-gray-100 shadow-xl p-10 rounded-3xl hover:shadow-2xl transition-all duration-500 relative hover:-translate-y-2 group">
+          <i data-lucide="quote" class="absolute top-8 right-8 w-12 h-12 text-primary/10"></i>
+          <div class="flex gap-1 mb-6 text-yellow-400">
+            <i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i><i data-lucide="star" class="w-5 h-5 fill-current"></i>
+          </div>
+          <p class="text-gray-700 font-medium text-lg italic mb-8 relative z-10 leading-relaxed">"${r.text}"</p>
+          <div class="flex items-center gap-4 border-t border-gray-100 pt-6">
+            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">${r.author.charAt(0)}</div>
+            <h5 class="text-gray-900 font-bold font-heading">${r.author}</h5>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    const renderSectors = () => {
+      document.getElementById('sectors-grid').innerHTML = DATA.sectors.map((s, i) => `
+        <div class="reveal zoom-in reveal-delay-${(i%6)+1} group p-6 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center text-center hover:bg-white hover:shadow-xl hover:border-primary/20 transition-all duration-500 hover:-translate-y-2">
+          <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-500 mb-4 group-hover:scale-110 group-hover:text-primary transition-all duration-300">
+            <i data-lucide="${s.icon}" class="w-6 h-6"></i>
+          </div>
+          <h4 class="font-bold font-heading text-sm text-gray-800">${s.title}</h4>
+        </div>
+      `).join('');
+    };
+
+    renderServices();
+    renderProcess();
+    renderPortfolio();
+    renderGallery();
+    renderTeam();
+    renderTestimonials();
+    renderSectors();
+    lucide.createIcons();
+
+    // INTERSECTION OBSERVER & ANIMATIONS (CountUp)
+    let observerEnabled = true;
+    const initObserver = () => {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { 
+          if(e.isIntersecting) { 
+            e.target.classList.add('active'); 
+            
+            const counters = e.target.querySelectorAll('.counter');
+            if(counters.length > 0) {
+              counters.forEach(counter => {
+                let start = null;
+                const target = +counter.getAttribute('data-target');
+                const prefix = counter.getAttribute('data-prefix') || '';
+                const suffix = counter.getAttribute('data-suffix') || '';
+                const duration = 2000;
+                
+                const step = (timestamp) => {
+                  if (!start) start = timestamp;
+                  const progress = Math.min((timestamp - start) / duration, 1);
+                  const easeOut = 1 - Math.pow(1 - progress, 3);
+                  const currentCount = Math.floor(easeOut * target);
+                  counter.innerText = prefix + currentCount + suffix;
+                  if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                  } else {
+                    counter.innerText = prefix + target + suffix;
+                  }
+                };
+                window.requestAnimationFrame(step);
+              });
+              counters.forEach(c => c.classList.remove('counter'));
+            }
+            obs.unobserve(e.target); 
+          } 
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+      
+      document.querySelectorAll('.reveal:not(.active)').forEach(el => obs.observe(el));
+      
+      const statsContainer = document.getElementById('stats-container');
+      if(statsContainer && !statsContainer.classList.contains('active')) {
+         obs.observe(statsContainer);
+      }
+    };
+
+    const clearActiveReveals = () => {
+      document.querySelectorAll('.reveal.active').forEach(el => {
+        el.classList.remove('active');
+        // Let the CSS transition reset it down
+      });
+      // We don't want to reset CountUp if they've already animated.
+    };
+
+    function router() {
+      const hash = window.location.hash || '#/home';
+      document.querySelectorAll('.view').forEach(v => {
+        v.classList.remove('active');
+        v.style.display = 'none';
+      });
+      
+      const routePath = hash.split('/')[1] || 'home';
+      const separatePages = ['galeri', 'kadromuz', 'iletisim'];
+      
+      // Setup the view first
+      const toggleView = (viewId) => {
+         const view = document.getElementById(viewId);
+         if(view) {
+           view.style.display = 'block';
+           void view.offsetWidth; 
+           view.classList.add('active');
+         }
+      }
+
+      if (separatePages.includes(routePath)) {
+        clearActiveReveals();
+        toggleView(`view-${routePath}`);
+        window.scrollTo(0, 0);
+        setTimeout(initObserver, 100);
+      } else {
+        const isHomePageActive = document.getElementById('view-home').classList.contains('active');
+        if (!isHomePageActive) {
+            clearActiveReveals();
+        }
+        toggleView('view-home');
+        
+        if (routePath && routePath !== 'home') {
+          setTimeout(() => {
+            const target = document.getElementById(routePath);
+            if (target) {
+              window.scrollTo({ 
+                top: target.offsetTop - document.getElementById('navbar').offsetHeight, 
+                behavior: 'smooth' 
+              });
+            }
+          }, 100);
+        } else {
+          window.scrollTo(0, 0);
+        }
+        if (!isHomePageActive) {
+           setTimeout(initObserver, 100);
+        }
+      }
+      
+      const mobileMenu = document.getElementById('mobile-menu');
+      if(!mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('hidden');
+          document.getElementById('menu-icon').classList.remove('hidden');
+          document.getElementById('close-icon').classList.add('hidden');
+      }
+    }
+    
+    window.addEventListener('hashchange', router);
+    document.addEventListener("DOMContentLoaded", () => { 
+      router(); 
+      initObserver();
+    });
+
+    function openVideo(url) { 
+      document.getElementById('yt-iframe').src = url; 
+      const modal = document.getElementById('video-modal');
+      modal.classList.remove('hidden'); 
+      modal.classList.add('flex'); 
+      setTimeout(() => modal.querySelector('.reveal').classList.add('active'), 100);
+      document.body.style.overflow = 'hidden';
+    }
+    function closeVideo() { 
+      document.getElementById('yt-iframe').src = ''; 
+      const modal = document.getElementById('video-modal');
+      modal.querySelector('.reveal').classList.remove('active');
+      setTimeout(() => {
+        modal.classList.add('hidden'); 
+        modal.classList.remove('flex');  
+        document.body.style.overflow = '';
+      }, 400); // Wait for transition
+    }
+    function openImage(url) { 
+      document.getElementById('lightbox-img').src = url; 
+      const modal = document.getElementById('image-modal');
+      modal.classList.remove('hidden'); 
+      modal.classList.add('flex'); 
+      setTimeout(() => modal.querySelector('.reveal').classList.add('active'), 100);
+      document.body.style.overflow = 'hidden';
+    }
+    function closeImage() { 
+      const modal = document.getElementById('image-modal');
+      modal.querySelector('.reveal').classList.remove('active');
+      setTimeout(() => {
+        modal.classList.add('hidden'); 
+        modal.classList.remove('flex'); 
+        document.body.style.overflow = '';
+      }, 400); // Wait for transition
+    }
+
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+
+    mobileBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+      if(mobileMenu.classList.contains('hidden')) {
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      } else {
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      }
+    });
+
+    // İletişim Formu Gönderimi
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submit-btn');
+        const statusDiv = document.getElementById('form-status');
+        const originalBtnText = submitBtn.innerHTML;
+        
+        // YÜKLENİYOR DURUMU
+        submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Gönderiliyor...';
+        submitBtn.disabled = true;
+        lucide.createIcons();
+        statusDiv.classList.add('hidden');
+        statusDiv.classList.remove('bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700');
+
+        try {
+          // ÖNEMLİ: Kendi e-postanıza bildirim gelmesi için Formspree URL'nizi buraya yapıştırın.
+          // Örnek: 'https://formspree.io/f/KENDI_ID_NUMARANIZ'
+          const FORMSPREE_URL = 'https://formspree.io/f/xjgljrpg'; 
+
+          const formData = new FormData(contactForm);
+          const response = await fetch(FORMSPREE_URL, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            statusDiv.textContent = 'Mesajınız başarıyla gönderildi! Size en kısa sürede dönüş yapacağız.';
+            statusDiv.classList.add('bg-green-100', 'text-green-700');
+            statusDiv.classList.remove('hidden');
+            contactForm.reset();
+          } else {
+            statusDiv.textContent = 'Gönderim sırasında bir hata oluştu. Lütfen Formspree ayarlarınızı kontrol edin.';
+            statusDiv.classList.add('bg-red-100', 'text-red-700');
+            statusDiv.classList.remove('hidden');
+          }
+        } catch (error) {
+          statusDiv.textContent = 'Bağlantı hatası oluştu. Lütfen tekrar deneyin.';
+          statusDiv.classList.add('bg-red-100', 'text-red-700');
+          statusDiv.classList.remove('hidden');
+        } finally {
+          submitBtn.innerHTML = originalBtnText;
+          submitBtn.disabled = false;
+        }
+      });
+    }
+
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('navbar');
+      if(window.scrollY > 20) { 
+        nav.classList.add('lg:nav-scrolled'); 
+        nav.classList.add('bg-white/95');
+        nav.classList.remove('lg:nav-transparent', 'border-transparent', 'lg:bg-transparent'); 
+      } else { 
+        nav.classList.remove('lg:nav-scrolled'); 
+        nav.classList.remove('bg-white/95');
+        nav.classList.add('lg:nav-transparent', 'border-transparent', 'bg-white/95', 'lg:bg-transparent'); 
+      }
+    });
+  </script>
+</body>
+</html>
